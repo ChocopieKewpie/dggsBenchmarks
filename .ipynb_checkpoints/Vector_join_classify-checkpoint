@@ -1,0 +1,164 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "29372051-18f4-41c4-a32d-df5955aa7355",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from functools import partial\n",
+    "from math import sqrt\n",
+    "from pathlib import Path\n",
+    "import geopandas as gpd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a9c22b4d-6a20-41a1-abc4-07f32be86c0a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "input_dir = Path('/home/richard/Documents/landcare/dggs-benchmarking/vector_1000')\n",
+    "output_dir = Path('/home/richard/Documents/landcare/dggs-benchmarking/output')\n",
+    "\n",
+    "# Get a list of all GPKG files in the folder\n",
+    "v_files = list(sorted(input_dir.glob('*.gpkg')))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5876bb58-8931-4eca-843c-532286f711e9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Specify the number of files to open\n",
+    "num_files_to_open = 30"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e7aa071d-45b7-40c8-b650-361e45f408dd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%%time\n",
+    "# Loop through each GPKG file and join\n",
+    "for i, file in enumerate(v_files[:num_files_to_open]):\n",
+    "    col_name = file.stem.split('_')[1]  # Extracting the column name from the file name\n",
+    "    df = gpd.read_file(file)\n",
+    "    df.columns = [col_name, *df.columns[1:]] #Setting the column to the file\n",
+    "    if i == 0:\n",
+    "        combined_df = df.copy()\n",
+    "    else:\n",
+    "        combined_df = gpd.overlay(combined_df, df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8e3c2170-aea2-42c5-b0b4-6c74c41cac45",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def is_prime(n):\n",
+    "    count = 0\n",
+    "    if n > 1:\n",
+    "        for i in range(1, n + 1):\n",
+    "            if n % i == 0:\n",
+    "                count += 1\n",
+    "    return count == 2\n",
+    "\n",
+    "def is_polygonal(s, x):\n",
+    "    assert s > 2 and s % 1 == 0 and x % 1 == 0\n",
+    "    n = (sqrt(8 * (s - 2) * x + (s - 4) ** 2) + (s - 4)) / (2 * (s - 2))\n",
+    "    return n % 1 == 0\n",
+    "\n",
+    "def is_fibonacci(n):\n",
+    "    a, b = 0,1\n",
+    "    while a < n:\n",
+    "        a, b = b, a + b\n",
+    "    return a == n\n",
+    "\n",
+    "def is_perfect(n):\n",
+    "    sum = 1\n",
+    "    i = 2\n",
+    "    while i * i <= n:\n",
+    "        if n % i == 0:\n",
+    "            sum = sum + i + n/i\n",
+    "        i += 1\n",
+    "    return sum == n and n != 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9944e1c2-89be-4b67-8f4e-54fc8cc49738",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "combined_df['sum'] = combined_df.select_dtypes(include='number').sum(axis=1)\n",
+    "classes = [\n",
+    "    ('is_prime', is_prime),\n",
+    "    ('is_triangular', partial(is_polygonal, 3)),\n",
+    "    ('is_rectangular', partial(is_polygonal, 4)),\n",
+    "    ('is_pentagonal', partial(is_polygonal, 5)),\n",
+    "    ('is_hexagonal', partial(is_polygonal, 6)),\n",
+    "    ('is_fibonacci', is_fibonacci),\n",
+    "    ('is_perfect', is_perfect),\n",
+    "]\n",
+    "for i, func in enumerate(classes):\n",
+    "    combined_df[func[0]] = combined_df['sum'].apply(func[1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b777320c-0e0a-478e-9c6f-bf05695442af",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "numerics = list(combined_df.select_dtypes(include='number'))\n",
+    "combined_df = combined_df.drop(columns=numerics)\n",
+    "print(combined_df)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e7ed42ed-9bea-4a4c-97cc-d581b02013ca",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "output_dir.mkdir(parents=True, exist_ok=True)\n",
+    "output = (output_dir / 'v.gpkg')\n",
+    "# output.touch(exist_ok=True)\n",
+    "combined_df.to_file(output, layer='benchmarking', driver='GPKG', mode='w')"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.6"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

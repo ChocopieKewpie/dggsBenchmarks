@@ -3,5 +3,5 @@ Raster_benchmarking/Raster/*/*.asc.aux.xml
 
 .ipynb_checkpoints
 
-Raster_benchmarking/Raster/*.tif.aux.xml
 Raster_benchmarking/Raster/*.tif
+Raster_benchmarking/Raster/*.tif.aux.xml

@@ -1,6 +1,10 @@
 Raster_benchmarking/Raster/*/*.asc
 Raster_benchmarking/Raster/*/*.asc.aux.xml
 
+Raster_benchmarking/DGGS/*/*.parquet
+Raster_benchmarking/DGGS/*/*.asc
+Raster_benchmarking/DGGS/*/*.asc.aux.xml
+
 .ipynb_checkpoints
 
 Raster_benchmarking/Raster/*.tif

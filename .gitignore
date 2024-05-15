@@ -4,6 +4,7 @@ Raster_benchmarking/Raster/*/*.asc.aux.xml
 Raster_benchmarking/DGGS/*/*.asc
 Raster_benchmarking/DGGS/*/*.asc.aux.xml
 
+Raster_benchmarking/data/*/*.gpkg
 Raster_benchmarking/data/*/*.parquet
 Raster_benchmarking/data/*/*.asc
 

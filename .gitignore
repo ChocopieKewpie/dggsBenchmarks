@@ -12,3 +12,5 @@ Raster_benchmarking/data/*/*.asc
 
 Raster_benchmarking/Raster/*.tif
 Raster_benchmarking/Raster/*.tif.aux.xml
+
+Vector_benchmarking/output-*.gpkg

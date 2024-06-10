@@ -14,3 +14,7 @@ Raster_benchmarking/Raster/*.tif
 Raster_benchmarking/Raster/*.tif.aux.xml
 
 Vector_benchmarking/output-*.gpkg
+Vector_benchmarking/DGGS/*.gpkg
+Vector_benchmarking/DGGS/*.csv
+Vector_benchmarking/Traditional/*.gpkg
+Vector_benchmarking/Traditional/*.csv
